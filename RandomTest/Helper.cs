@@ -92,7 +92,8 @@ namespace RandomTest
                     
                     break;
                 }
-                else if (newVehicle is Motorcycle && parkering[i].IsFree && parkering[i].Capacity >= newVehicle.Size())
+                else if (newVehicle is Motorcycle && parkering[i].Capacity >= newVehicle.Size() &&
+                 (parkering[i].IsFree || parkering[i].Vehicles.TrueForAll(v => v is Motorcycle)))
                 {
                     parkering[i].Vehicles.Add(newVehicle);
                     parkering[i].Capacity -= newVehicle.Size();
@@ -128,7 +129,7 @@ namespace RandomTest
             TimeSpan parkTime;
             double parkToPay;
             bool regnummerMatchar = false;
-            
+
             for (int i = 0; i < parkering.Count; i++)
             {
                 for (int j = 0; j < parkering[i].Vehicles.Count; j++)
@@ -138,7 +139,7 @@ namespace RandomTest
                         regnummerMatchar = true;
                         parkTime = DateTime.Now - parkering[i].ParkedDate;
                         double totalMitues = parkTime.TotalMinutes;
-                        
+
                         if (parkering[i].Vehicles[j] is Car)
                         {
                             parkering[i].Vehicles.Remove(parkering[i].Vehicles[j]);
@@ -159,7 +160,7 @@ namespace RandomTest
                         {
                             parkering[i].Vehicles.Remove(parkering[i].Vehicles[j]);
                             parkering[i].Capacity += 1;
-                            
+
                             if (i + 1 < parkering.Count && parkering[i + 1].Vehicles.Count > 0)
                             {
                                 for (int k = 0; k < parkering[i + 1].Vehicles.Count; k++)
@@ -177,6 +178,10 @@ namespace RandomTest
                             }
                         }
 
+                        if (parkering[i].Vehicles is Motorcycle && parkering[i].Capacity > 0)
+                        {
+                            parkering[i].IsFree = true;
+                        }
                         if (parkering[i].Capacity == 1 && parkering[i].Vehicles.Count == 0)
                         {
                             parkering[i].IsFree = true;
@@ -188,20 +193,114 @@ namespace RandomTest
                     }
                 }
             }
-            
-            if(regnummerMatchar == false)
+
+            if (regnummerMatchar == false)
             {
                 Console.WriteLine("Regnumret matchar inget fordon!");
             }
 
         }
 
+        //public static void AvslutaParkering(List<ParkingSpot> parkering, string regNummer)
+        //{
+        //    TimeSpan parkTime;
+        //    double totalMinutes;
+        //    bool regnummerMatchar = false;
 
+        //    for (int i = 0; i < parkering.Count; i++)
+        //    {
+        //        for (int j = 0; j < parkering[i].Vehicles.Count; j++)
+        //        {
+        //            if (regNummer == parkering[i].Vehicles[j].RegNummer)
+        //            {
+        //                regnummerMatchar = true;
+        //                parkTime = DateTime.Now - parkering[i].ParkedDate;
+        //                totalMinutes = parkTime.TotalMinutes;
 
+        //                if (parkering[i].Vehicles[j] is Car)
+        //                {
+        //                    HanteraBil(parkering, i, j, regNummer, totalMinutes);
+        //                }
+        //                else if (parkering[i].Vehicles[j] is Motorcycle)
+        //                {
+        //                    HanteraMotorcykel(parkering, i, j, regNummer, totalMinutes);
+        //                }
+        //                else if (parkering[i].Vehicles[j] is Bus)
+        //                {
+        //                    HanteraBuss(parkering, i, j, regNummer, totalMinutes);
+        //                }
 
+        //                KontrolleraOchUppdateraLedigPlats(parkering, i);
+        //                return; // Avslutar eftersom fordonet har hittats och hanterats
+        //            }
+        //        }
+        //    }
 
+        //    if (!regnummerMatchar)
+        //    {
+        //        Console.WriteLine("Regnumret matchar inget fordon!");
+        //    }
+        //}
 
+        //// Metod för att hantera avslut av bil
+        //private static void HanteraBil(List<ParkingSpot> parkering, int i, int j, string regNummer, double totalMinutes)
+        //{
+        //    parkering[i].Vehicles.RemoveAt(j);
+        //    parkering[i].Capacity += 1;
 
+        //    double cost = totalMinutes * 1.5;
+        //    Console.WriteLine($"Bil med regnummer {regNummer} lämnade parkeringen.");
+        //    Console.WriteLine($"Total parkeringstid var: {totalMinutes} minuter. Att betala: {cost} kr.");
+        //}
+
+        //// Metod för att hantera avslut av motorcykel
+        //private static void HanteraMotorcykel(List<ParkingSpot> parkering, int i, int j, string regNummer, double totalMinutes)
+        //{
+        //    parkering[i].Vehicles.RemoveAt(j);
+        //    parkering[i].Capacity += 0.5;
+
+        //    double cost = totalMinutes * (1.5 / 2);
+        //    Console.WriteLine($"Motorcykel med regnummer {regNummer} lämnade parkeringen.");
+        //    Console.WriteLine($"Total parkeringstid var: {totalMinutes} minuter. Att betala: {cost} kr.");
+        //}
+
+        //// Metod för att hantera avslut av buss
+        //private static void HanteraBuss(List<ParkingSpot> parkering, int i, int j, string regNummer, double totalMinutes)
+        //{
+        //    parkering[i].Vehicles.RemoveAt(j);
+        //    parkering[i].Capacity += 1;
+
+        //    // Hantera den extra platsen för bussen
+        //    if (i + 1 < parkering.Count)
+        //    {
+        //        for (int k = 0; k < parkering[i + 1].Vehicles.Count; k++)
+        //        {
+        //            if (parkering[i + 1].Vehicles[k].RegNummer == regNummer)
+        //            {
+        //                parkering[i + 1].Vehicles.RemoveAt(k);
+        //                parkering[i + 1].Capacity += 1;
+
+        //                double cost = totalMinutes * (1.5 * 2);
+        //                Console.WriteLine($"Buss med regnummer {regNummer} lämnade parkeringarna {parkering[i].Number} och {parkering[i + 1].Number}.");
+        //                Console.WriteLine($"Total parkeringstid var: {totalMinutes} minuter. Att betala: {cost} kr.");
+        //                break;
+        //            }
+        //        }
+        //    }
+        //}
+
+        //// Kontrollera om en plats är ledig och uppdatera status
+        //private static void KontrolleraOchUppdateraLedigPlats(List<ParkingSpot> parkering, int i)
+        //{
+        //    if (parkering[i].Capacity == 1 && parkering[i].Vehicles.Count == 0)
+        //    {
+        //        parkering[i].IsFree = true;
+        //    }
+        //    if (i + 1 < parkering.Count && parkering[i + 1].Capacity == 1 && parkering[i + 1].Vehicles.Count == 0)
+        //    {
+        //        parkering[i + 1].IsFree = true;
+        //    }
+        //}
 
 
     }
